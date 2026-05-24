@@ -43,8 +43,3 @@ npm install
 ```
 npm run scan <path-to-react-file>
 ```
-
-## Status
-
-Stage 1 of 5 complete: project scaffold. The scanner core and the four
-detectors are added in the following stages.
