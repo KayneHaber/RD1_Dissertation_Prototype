@@ -14,7 +14,7 @@ export interface Finding {
   filePath: string; // which file the issue is in
   line: number; // line number of the issue
   type: FindingType; // which kind of pattern was matched
-  severity: "high" | "medium" | "low";
+  severity: "high severity" | "medium severity" | "low severity";
   message: string; // what the problem is, in plain words
   suggestion: string; // how to fix it
 }
