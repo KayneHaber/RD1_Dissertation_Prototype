@@ -13,6 +13,7 @@ import {
   detectInnerHtmlAssignment,
   detectDangerousCall,
 } from "./detectors/dom-manipulation";
+import { detectUnsanitisedInput } from "./detectors/unsanitised-input";
 
 // @babel/traverse may export the function directly or under .default,
 // depending on the module version. Handle both.
@@ -49,6 +50,11 @@ export function scanFile(filePath: string): Finding[] {
       const urlFinding = detectDangerousUrl(path, filePath);
       if (urlFinding) {
         findings.push(urlFinding);
+      }
+
+      const unsanitisedFinding = detectUnsanitisedInput(path, filePath);
+      if (unsanitisedFinding) {
+        findings.push(unsanitisedFinding);
       }
     },
 
