@@ -8,6 +8,7 @@ import { parse } from "@babel/parser";
 import _traverse from "@babel/traverse";
 import { Finding } from "./types";
 import { detectDangerousHtml } from "./detectors/dangerous-html";
+import { detectDangerousUrl } from "./detectors/dangerous-url";
 
 // @babel/traverse may export the function directly or under .default,
 // depending on the module version. Handle both.
@@ -34,11 +35,16 @@ export function scanFile(filePath: string): Finding[] {
   const findings: Finding[] = [];
 
   traverse(ast, {
-    // JSXAttribute nodes are checked by the dangerouslySetInnerHTML detector.
+    // JSXAttribute nodes are checked by the attribute-based detectors.
     JSXAttribute(path) {
-      const finding = detectDangerousHtml(path, filePath);
-      if (finding) {
-        findings.push(finding);
+      const htmlFinding = detectDangerousHtml(path, filePath);
+      if (htmlFinding) {
+        findings.push(htmlFinding);
+      }
+
+      const urlFinding = detectDangerousUrl(path, filePath);
+      if (urlFinding) {
+        findings.push(urlFinding);
       }
     },
   });

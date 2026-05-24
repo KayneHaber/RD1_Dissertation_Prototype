@@ -22,7 +22,7 @@ function main(): void {
   const findings: Finding[] = scanFile(filePath);
 
   if (findings.length === 0) {
-    console.log("No XSS issues found (no detectors implemented yet).");
+    console.log("No XSS issues found.");
   } else {
     findings.forEach((f) => {
       console.log(`[${f.severity}] line ${f.line}: ${f.message}`);
