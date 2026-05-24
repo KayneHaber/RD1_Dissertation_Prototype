@@ -9,6 +9,10 @@ import _traverse from "@babel/traverse";
 import { Finding } from "./types";
 import { detectDangerousHtml } from "./detectors/dangerous-html";
 import { detectDangerousUrl } from "./detectors/dangerous-url";
+import {
+  detectInnerHtmlAssignment,
+  detectDangerousCall,
+} from "./detectors/dom-manipulation";
 
 // @babel/traverse may export the function directly or under .default,
 // depending on the module version. Handle both.
@@ -45,6 +49,22 @@ export function scanFile(filePath: string): Finding[] {
       const urlFinding = detectDangerousUrl(path, filePath);
       if (urlFinding) {
         findings.push(urlFinding);
+      }
+    },
+
+    // AssignmentExpression nodes are checked for innerHTML / outerHTML writes.
+    AssignmentExpression(path) {
+      const finding = detectInnerHtmlAssignment(path, filePath);
+      if (finding) {
+        findings.push(finding);
+      }
+    },
+
+    // CallExpression nodes are checked for eval / document.write calls.
+    CallExpression(path) {
+      const finding = detectDangerousCall(path, filePath);
+      if (finding) {
+        findings.push(finding);
       }
     },
   });
