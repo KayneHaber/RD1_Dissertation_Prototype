@@ -1,12 +1,13 @@
 /**
  * Scanner core: reads a React file, parses it into an AST,
- * and walks the tree. Detectors plug into this in stage 3.
+ * walks the tree, and runs detectors on relevant nodes.
  */
 
 import { readFileSync } from "fs";
 import { parse } from "@babel/parser";
 import _traverse from "@babel/traverse";
 import { Finding } from "./types";
+import { detectDangerousHtml } from "./detectors/dangerous-html";
 
 // @babel/traverse may export the function directly or under .default,
 // depending on the module version. Handle both.
@@ -29,19 +30,18 @@ export function scanFile(filePath: string): Finding[] {
     plugins: ["jsx", "typescript"],
   });
 
-  // 3. Walk the tree. For now we just count node types
-  //    to prove the parsing and traversal work.
-  const nodeCounts: Record<string, number> = {};
+  // 3. Walk the tree, running detectors on the node types they apply to.
+  const findings: Finding[] = [];
+
   traverse(ast, {
-    enter(path) {
-      const type = path.node.type;
-      nodeCounts[type] = (nodeCounts[type] || 0) + 1;
+    // JSXAttribute nodes are checked by the dangerouslySetInnerHTML detector.
+    JSXAttribute(path) {
+      const finding = detectDangerousHtml(path, filePath);
+      if (finding) {
+        findings.push(finding);
+      }
     },
   });
 
-  console.log("AST node counts:", nodeCounts);
-
-  // No detectors yet, so no findings.
-  const findings: Finding[] = [];
   return findings;
 }
